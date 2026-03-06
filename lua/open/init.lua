@@ -33,6 +33,12 @@ function M.open_under_cursor()
   -- Strip common surrounding characters like quotes, parens, brackets, commas
   word = word:gsub("^[%[%]()<>\"',]+", ""):gsub("[%[%]()<>\"',]+$", "")
 
+  -- Expand ~ to home directory
+  if word:sub(1, 1) == "~" then
+    local home = os.getenv("HOME") or ""
+    word = home .. word:sub(2)
+  end
+
   vim.fn.jobstart({ "open", word }, { detach = true })
   vim.notify("Opening: " .. word, vim.log.levels.INFO)
 end
