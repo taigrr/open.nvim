@@ -1,3 +1,4 @@
+--Opening: '~/code/foss/open.nvim',
 local M = {}
 
 --- Get the word under cursor (whitespace delimited)
@@ -8,13 +9,13 @@ local function get_word_under_cursor()
 
   -- Find start of word (non-whitespace)
   local start_col = col
-  while start_col > 1 and not line:sub(start_col - 1, start_col - 1):match('%s') do
+  while start_col > 1 and not line:sub(start_col - 1, start_col - 1):match("%s") do
     start_col = start_col - 1
   end
 
   -- Find end of word (non-whitespace)
   local end_col = col
-  while end_col <= #line and not line:sub(end_col, end_col):match('%s') do
+  while end_col <= #line and not line:sub(end_col, end_col):match("%s") do
     end_col = end_col + 1
   end
 
@@ -24,16 +25,16 @@ end
 --- Open the word under cursor using system `open` command
 function M.open_under_cursor()
   local word = get_word_under_cursor()
-  if word == '' then
-    vim.notify('No word under cursor', vim.log.levels.WARN)
+  if word == "" then
+    vim.notify("No word under cursor", vim.log.levels.WARN)
     return
   end
 
-  -- Strip common surrounding characters like quotes, parens, brackets
-  word = word:gsub('^[%[%]()<>"\']', ''):gsub('[%[%]()<>"\']$', '')
+  -- Strip common surrounding characters like quotes, parens, brackets, commas
+  word = word:gsub("^[%[%]()<>\"',]+", ""):gsub("[%[%]()<>\"',]+$", "")
 
-  vim.fn.jobstart({ 'open', word }, { detach = true })
-  vim.notify('Opening: ' .. word, vim.log.levels.INFO)
+  vim.fn.jobstart({ "open", word }, { detach = true })
+  vim.notify("Opening: " .. word, vim.log.levels.INFO)
 end
 
 --- Setup function for lazy.nvim
@@ -41,8 +42,8 @@ end
 function M.setup(opts)
   opts = opts or {}
   -- Create user command
-  vim.api.nvim_create_user_command('OpenUnderCursor', M.open_under_cursor, {
-    desc = 'Open word under cursor with system open command',
+  vim.api.nvim_create_user_command("OpenUnderCursor", M.open_under_cursor, {
+    desc = "Open word under cursor with system open command",
   })
 end
 
