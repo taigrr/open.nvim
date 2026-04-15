@@ -1,6 +1,6 @@
 # open.nvim
 
-Open the word under cursor with macOS `open` command.
+Open the word under cursor (or visual selection) with your system opener.
 
 ## Installation
 
@@ -15,27 +15,69 @@ Open the word under cursor with macOS `open` command.
 }
 ```
 
+With keymap:
+
+```lua
+{
+  "taigrr/open.nvim",
+  config = function()
+    require("open").setup({
+      keymap = { open = "gx" },
+    })
+  end,
+}
+```
+
 ## Requirements
 
 - Neovim >= **0.9.0**
-- macOS (uses `open` command)
+
+## Platform Support
+
+The opener command is auto-detected:
+
+| Platform     | Command      |
+| ------------ | ------------ |
+| macOS        | `open`       |
+| Linux        | `xdg-open`   |
+| WSL          | `wslview`    |
+| Windows      | `start`      |
+
+Override with `opener` option:
+
+```lua
+require("open").setup({
+  opener = "/usr/bin/xdg-open",
+})
+```
 
 ## Usage
 
-```vim
-:OpenUnderCursor
-```
+### Commands
 
-Opens URLs, file paths, or any text under cursor using the system `open` command.
+| Command            | Mode     | Description                    |
+| ------------------ | -------- | ------------------------------ |
+| `:OpenUnderCursor` | Normal   | Open word under cursor         |
+| `:OpenVisual`      | Visual   | Open visual selection          |
 
-## API
+### API
 
 ```lua
 local open = require("open")
 
-open.setup()                -- Create :OpenUnderCursor command
-open.open_under_cursor()    -- Open word under cursor
+open.setup()              -- Create commands
+open.open_under_cursor()  -- Open word under cursor
+open.open_visual()        -- Open visual selection
+open.open("https://...")  -- Open any string
 ```
+
+## What Gets Opened
+
+The plugin grabs the whitespace-delimited word under cursor (or visual selection), strips surrounding punctuation (quotes, brackets, parens), expands `~` to home, and passes it to the system opener. Works with:
+
+- URLs (`https://github.com/taigrr/open.nvim`)
+- File paths (`~/Documents/notes.txt`)
+- Anything your system opener handles
 
 ## License
 
