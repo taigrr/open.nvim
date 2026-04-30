@@ -1,0 +1,59 @@
+vim.opt.runtimepath:append(vim.fn.getcwd())
+
+local open = require("open")
+local private = open._private
+
+local function assert_equal(actual, expected, label)
+  if not vim.deep_equal(actual, expected) then
+    error((label or "assert_equal failed") .. "\nexpected: " .. vim.inspect(expected) .. "\nactual: " .. vim.inspect(actual))
+  end
+end
+
+local function assert_truthy(value, label)
+  if not value then
+    error(label or "expected truthy value")
+  end
+end
+
+assert_equal(private.clean_word('("https://example.com/path"),'), "https://example.com/path", "clean_word strips wrappers")
+assert_equal(private.clean_word("~/notes.txt..."), "~/notes.txt", "clean_word strips trailing punctuation")
+assert_equal(private.expand_home("~/notes.txt"), (os.getenv("HOME") or "") .. "/notes.txt", "expand_home expands tilde")
+assert_equal(private.build_open_command("xdg-open", "https://example.com"), { "xdg-open", "https://example.com" }, "build_open_command handles string opener")
+assert_equal(private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com"), { "cmd.exe", "/c", "start", "", "https://example.com" }, "build_open_command handles list opener")
+
+local detect_cases = {
+  {
+    name = "darwin",
+    uname = { sysname = "Darwin", release = "23.0.0" },
+    expected = "open",
+  },
+  {
+    name = "linux",
+    uname = { sysname = "Linux", release = "6.8.0" },
+    expected = "xdg-open",
+  },
+  {
+    name = "wsl",
+    uname = { sysname = "Linux", release = "5.15.153.1-microsoft-standard-WSL2" },
+    expected = "wslview",
+  },
+  {
+    name = "windows",
+    uname = { sysname = "Windows_NT", release = "10.0.22631" },
+    expected = { "cmd.exe", "/c", "start", "" },
+  },
+}
+
+local original_os_uname = vim.loop.os_uname
+for _, case in ipairs(detect_cases) do
+  vim.loop.os_uname = function()
+    return case.uname
+  end
+  assert_equal(private.detect_opener(), case.expected, "detect_opener " .. case.name)
+end
+vim.loop.os_uname = original_os_uname
+
+assert_truthy(private.opener_exists("sh"), "opener_exists detects available binary")
+assert_equal(private.opener_exists("definitely-not-a-real-open-command"), false, "opener_exists rejects missing binary")
+
+print("tests passed")
