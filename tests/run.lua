@@ -56,4 +56,10 @@ vim.loop.os_uname = original_os_uname
 assert_truthy(private.opener_exists("sh"), "opener_exists detects available binary")
 assert_equal(private.opener_exists("definitely-not-a-real-open-command"), false, "opener_exists rejects missing binary")
 
+open.setup({ keymap = { open = "gx" } })
+assert_truthy(vim.fn.exists(":OpenUnderCursor") == 2, "OpenUnderCursor command exists")
+assert_truthy(vim.fn.exists(":OpenVisual") == 2, "OpenVisual command exists")
+assert_truthy(vim.fn.maparg("gx", "n") ~= "", "normal mode keymap is installed")
+assert_equal(vim.fn.maparg("gx", "v"), ":<C-U>OpenVisual<CR>", "visual mode keymap is installed")
+
 print("tests passed")

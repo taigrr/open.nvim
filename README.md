@@ -36,12 +36,12 @@ With keymap:
 
 The opener command is auto-detected:
 
-| Platform     | Command      |
-| ------------ | ------------ |
-| macOS        | `open`       |
-| Linux        | `xdg-open`   |
-| WSL          | `wslview`    |
-| Windows      | `start`      |
+| Platform     | Command                    |
+| ------------ | -------------------------- |
+| macOS        | `open`                     |
+| Linux        | `xdg-open`                 |
+| WSL          | `wslview`                  |
+| Windows      | `cmd.exe /c start "" ...` |
 
 Override with `opener` option:
 
@@ -78,6 +78,16 @@ The plugin grabs the whitespace-delimited word under cursor (or visual selection
 - URLs (`https://github.com/taigrr/open.nvim`)
 - File paths (`~/Documents/notes.txt`)
 - Anything your system opener handles
+
+## Testing
+
+Run the headless test suite:
+
+```bash
+nvim --headless -u NONE -c "set rtp+=." -l tests/run.lua
+```
+
+The tests cover opener detection, command building, command registration, and visual-mode keymap setup.
 
 ## License
 

@@ -49,7 +49,13 @@ require("open").setup({
 
 ## Testing
 
-**No automated tests.** Manual testing:
+Automated headless tests live in `tests/run.lua`:
+
+```bash
+nvim --headless -u NONE -c "set rtp+=." -l tests/run.lua
+```
+
+Manual smoke testing is still useful:
 
 ```lua
 -- In Neovim:
