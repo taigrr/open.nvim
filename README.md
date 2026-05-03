@@ -41,7 +41,7 @@ The opener command is auto-detected:
 | macOS        | `open`                     |
 | Linux        | `xdg-open`                 |
 | WSL          | `wslview`                  |
-| Windows      | `cmd.exe /c start "" ...` |
+| Windows      | `cmd.exe /c start "" "..."` |
 
 Override with `opener` option:
 

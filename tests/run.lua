@@ -19,7 +19,8 @@ assert_equal(private.clean_word('("https://example.com/path"),'), "https://examp
 assert_equal(private.clean_word("~/notes.txt..."), "~/notes.txt", "clean_word strips trailing punctuation")
 assert_equal(private.expand_home("~/notes.txt"), (os.getenv("HOME") or "") .. "/notes.txt", "expand_home expands tilde")
 assert_equal(private.build_open_command("xdg-open", "https://example.com"), { "xdg-open", "https://example.com" }, "build_open_command handles string opener")
-assert_equal(private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com"), { "cmd.exe", "/c", "start", "", "https://example.com" }, "build_open_command handles list opener")
+assert_equal(private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com?a=1&b=2"), { "cmd.exe", "/c", "start", "", '"https://example.com?a=1&b=2"' }, "build_open_command quotes Windows start targets")
+assert_equal(private.build_open_command({ "python", "-m", "webbrowser" }, "https://example.com"), { "python", "-m", "webbrowser", "https://example.com" }, "build_open_command preserves generic list opener args")
 
 local detect_cases = {
   {

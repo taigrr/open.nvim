@@ -46,6 +46,11 @@ end
 local function build_open_command(opener, target)
   if type(opener) == "table" then
     local command = vim.deepcopy(opener)
+
+    if command[1] == "cmd.exe" and command[2] == "/c" and command[3]:lower() == "start" then
+      target = string.format('"%s"', target:gsub('"', '\\"'))
+    end
+
     table.insert(command, target)
     return command
   end
