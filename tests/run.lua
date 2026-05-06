@@ -18,6 +18,15 @@ end
 assert_equal(private.clean_word('("https://example.com/path"),'), "https://example.com/path", "clean_word strips wrappers")
 assert_equal(private.clean_word("~/notes.txt..."), "~/notes.txt", "clean_word strips trailing punctuation")
 assert_equal(private.expand_home("~/notes.txt"), (os.getenv("HOME") or "") .. "/notes.txt", "expand_home expands tilde")
+
+vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+vim.api.nvim_win_set_cursor(0, { 1, 0 })
+assert_equal(private.get_word_under_cursor(), "alpha", "get_word_under_cursor reads current token")
+vim.api.nvim_win_set_cursor(0, { 1, 5 })
+assert_equal(private.get_word_under_cursor(), "", "get_word_under_cursor ignores whitespace")
+vim.api.nvim_win_set_cursor(0, { 1, 6 })
+assert_equal(private.get_word_under_cursor(), "beta", "get_word_under_cursor reads following token")
+
 assert_equal(private.build_open_command("xdg-open", "https://example.com"), { "xdg-open", "https://example.com" }, "build_open_command handles string opener")
 assert_equal(private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com?a=1&b=2"), { "cmd.exe", "/c", "start", "", '"https://example.com?a=1&b=2"' }, "build_open_command quotes Windows start targets")
 assert_equal(private.build_open_command({ "python", "-m", "webbrowser" }, "https://example.com"), { "python", "-m", "webbrowser", "https://example.com" }, "build_open_command preserves generic list opener args")

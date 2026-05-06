@@ -79,6 +79,11 @@ end
 local function get_word_under_cursor()
   local line = vim.api.nvim_get_current_line()
   local col = vim.api.nvim_win_get_cursor(0)[2] + 1 -- 1-indexed
+  local char = line:sub(col, col)
+
+  if char == "" or char:match("%s") then
+    return ""
+  end
 
   -- Find start of word (non-whitespace)
   local start_col = col
@@ -242,6 +247,7 @@ M._private = {
   clean_word = clean_word,
   detect_opener = detect_opener,
   expand_home = expand_home,
+  get_word_under_cursor = get_word_under_cursor,
   opener_exists = opener_exists,
 }
 
