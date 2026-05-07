@@ -111,6 +111,15 @@ local function get_visual_selection()
   local start_row, start_col = start_pos[1], start_pos[2]
   local end_row, end_col = end_pos[1], end_pos[2]
 
+  if start_row == 0 or end_row == 0 then
+    return ""
+  end
+
+  if start_row > end_row or (start_row == end_row and start_col > end_col) then
+    start_row, end_row = end_row, start_row
+    start_col, end_col = end_col, start_col
+  end
+
   if start_row ~= end_row then
     -- Multi-line: join with spaces
     local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
@@ -248,6 +257,7 @@ M._private = {
   detect_opener = detect_opener,
   expand_home = expand_home,
   get_word_under_cursor = get_word_under_cursor,
+  get_visual_selection = get_visual_selection,
   opener_exists = opener_exists,
 }
 
