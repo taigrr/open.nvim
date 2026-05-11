@@ -4,7 +4,7 @@ local M = {}
 ---@type table
 local config = {
   --- Custom opener command (auto-detected if nil)
-  ---@type string|nil
+  ---@type string|string[]|nil
   opener = nil,
   --- Keymaps to set up (nil = no keymaps)
   ---@type table|nil
@@ -12,7 +12,7 @@ local config = {
 }
 
 --- Detect the system opener command
----@return string
+---@return string|string[]
 local function detect_opener()
   local uname = vim.loop.os_uname()
   local sysname = uname.sysname
@@ -26,7 +26,7 @@ local function detect_opener()
     end
     return "xdg-open"
   elseif sysname:match("^Windows") or sysname:match("^MINGW") or sysname:match("^MSYS") then
-    return "start"
+    return { "cmd.exe", "/c", "start", "" }
   end
 
   -- Fallback: try xdg-open
@@ -34,9 +34,44 @@ local function detect_opener()
 end
 
 --- Get the opener command (user-configured or auto-detected)
----@return string
+---@return string|string[]
 local function get_opener()
   return config.opener or detect_opener()
+end
+
+--- Normalize opener into a jobstart command list.
+---@param opener string|string[]
+---@param target string
+---@return string[]
+local function build_open_command(opener, target)
+  if type(opener) == "table" then
+    local command = vim.deepcopy(opener)
+
+    if command[1] == "cmd.exe" and command[2] == "/c" and command[3]:lower() == "start" then
+      target = string.format('"%s"', target:gsub('"', '\\"'))
+    end
+
+    table.insert(command, target)
+    return command
+  end
+
+  return { opener, target }
+end
+
+--- Check whether the opener executable is available.
+---@param opener string|string[]
+---@return boolean
+local function opener_exists(opener)
+  local executable = type(opener) == "table" and opener[1] or opener
+  if not executable or executable == "" then
+    return false
+  end
+
+  if executable:match("[/\\]") then
+    return vim.loop.fs_stat(executable) ~= nil
+  end
+
+  return vim.fn.executable(executable) == 1
 end
 
 --- Get the word under cursor (whitespace delimited)
@@ -44,6 +79,11 @@ end
 local function get_word_under_cursor()
   local line = vim.api.nvim_get_current_line()
   local col = vim.api.nvim_win_get_cursor(0)[2] + 1 -- 1-indexed
+  local char = line:sub(col, col)
+
+  if char == "" or char:match("%s") then
+    return ""
+  end
 
   -- Find start of word (non-whitespace)
   local start_col = col
@@ -70,6 +110,15 @@ local function get_visual_selection()
   local end_pos = vim.api.nvim_buf_get_mark(0, ">")
   local start_row, start_col = start_pos[1], start_pos[2]
   local end_row, end_col = end_pos[1], end_pos[2]
+
+  if start_row == 0 or end_row == 0 then
+    return ""
+  end
+
+  if start_row > end_row or (start_row == end_row and start_col > end_col) then
+    start_row, end_row = end_row, start_row
+    start_col, end_col = end_col, start_col
+  end
 
   if start_row ~= end_row then
     -- Multi-line: join with spaces
@@ -130,7 +179,13 @@ function M.open(target)
   end
 
   local opener = get_opener()
-  vim.fn.jobstart({ opener, target }, {
+  if not opener_exists(opener) then
+    vim.notify("open.nvim: opener not found", vim.log.levels.ERROR)
+    return
+  end
+
+  local command = build_open_command(opener, target)
+  local job = vim.fn.jobstart(command, {
     detach = true,
     on_stderr = function(_, data)
       local msg = table.concat(data, "\n"):gsub("^%s+", ""):gsub("%s+$", "")
@@ -141,6 +196,12 @@ function M.open(target)
       end
     end,
   })
+
+  if job <= 0 then
+    vim.notify("open.nvim: failed to start opener", vim.log.levels.ERROR)
+    return
+  end
+
   vim.notify("Opening: " .. target, vim.log.levels.INFO)
 end
 
@@ -189,5 +250,15 @@ function M.setup(opts)
     end
   end
 end
+
+M._private = {
+  build_open_command = build_open_command,
+  clean_word = clean_word,
+  detect_opener = detect_opener,
+  expand_home = expand_home,
+  get_word_under_cursor = get_word_under_cursor,
+  get_visual_selection = get_visual_selection,
+  opener_exists = opener_exists,
+}
 
 return M
