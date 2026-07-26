@@ -39,6 +39,7 @@ assert_equal(private.get_visual_selection(), "beta gamma", "get_visual_selection
 
 assert_equal(private.build_open_command("xdg-open", "https://example.com"), { "xdg-open", "https://example.com" }, "build_open_command handles string opener")
 assert_equal(private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com?a=1&b=2"), { "cmd.exe", "/c", "start", "", '"https://example.com?a=1&b=2"' }, "build_open_command quotes Windows start targets")
+assert_equal(private.build_open_command({ "cmd.exe", "/c" }, "https://example.com"), { "cmd.exe", "/c", "https://example.com" }, "build_open_command tolerates short cmd.exe opener lists")
 assert_equal(private.build_open_command({ "python", "-m", "webbrowser" }, "https://example.com"), { "python", "-m", "webbrowser", "https://example.com" }, "build_open_command preserves generic list opener args")
 
 local detect_cases = {
