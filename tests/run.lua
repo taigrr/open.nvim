@@ -5,7 +5,9 @@ local private = open._private
 
 local function assert_equal(actual, expected, label)
   if not vim.deep_equal(actual, expected) then
-    error((label or "assert_equal failed") .. "\nexpected: " .. vim.inspect(expected) .. "\nactual: " .. vim.inspect(actual))
+    error(
+      (label or "assert_equal failed") .. "\nexpected: " .. vim.inspect(expected) .. "\nactual: " .. vim.inspect(actual)
+    )
   end
 end
 
@@ -15,7 +17,11 @@ local function assert_truthy(value, label)
   end
 end
 
-assert_equal(private.clean_word('("https://example.com/path"),'), "https://example.com/path", "clean_word strips wrappers")
+assert_equal(
+  private.clean_word('("https://example.com/path"),'),
+  "https://example.com/path",
+  "clean_word strips wrappers"
+)
 assert_equal(private.clean_word("~/notes.txt..."), "~/notes.txt", "clean_word strips trailing punctuation")
 assert_equal(private.expand_home("~/notes.txt"), (os.getenv("HOME") or "") .. "/notes.txt", "expand_home expands tilde")
 
@@ -37,10 +43,26 @@ vim.api.nvim_buf_set_mark(0, "<", 2, 4, {})
 vim.api.nvim_buf_set_mark(0, ">", 1, 6, {})
 assert_equal(private.get_visual_selection(), "beta gamma", "get_visual_selection normalizes reversed marks")
 
-assert_equal(private.build_open_command("xdg-open", "https://example.com"), { "xdg-open", "https://example.com" }, "build_open_command handles string opener")
-assert_equal(private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com?a=1&b=2"), { "cmd.exe", "/c", "start", "", '"https://example.com?a=1&b=2"' }, "build_open_command quotes Windows start targets")
-assert_equal(private.build_open_command({ "cmd.exe", "/c" }, "https://example.com"), { "cmd.exe", "/c", "https://example.com" }, "build_open_command tolerates short cmd.exe opener lists")
-assert_equal(private.build_open_command({ "python", "-m", "webbrowser" }, "https://example.com"), { "python", "-m", "webbrowser", "https://example.com" }, "build_open_command preserves generic list opener args")
+assert_equal(
+  private.build_open_command("xdg-open", "https://example.com"),
+  { "xdg-open", "https://example.com" },
+  "build_open_command handles string opener"
+)
+assert_equal(
+  private.build_open_command({ "cmd.exe", "/c", "start", "" }, "https://example.com?a=1&b=2"),
+  { "cmd.exe", "/c", "start", "", '"https://example.com?a=1&b=2"' },
+  "build_open_command quotes Windows start targets"
+)
+assert_equal(
+  private.build_open_command({ "cmd.exe", "/c" }, "https://example.com"),
+  { "cmd.exe", "/c", "https://example.com" },
+  "build_open_command tolerates short cmd.exe opener lists"
+)
+assert_equal(
+  private.build_open_command({ "python", "-m", "webbrowser" }, "https://example.com"),
+  { "python", "-m", "webbrowser", "https://example.com" },
+  "build_open_command preserves generic list opener args"
+)
 
 local detect_cases = {
   {
@@ -82,5 +104,10 @@ assert_truthy(vim.fn.exists(":OpenUnderCursor") == 2, "OpenUnderCursor command e
 assert_truthy(vim.fn.exists(":OpenVisual") == 2, "OpenVisual command exists")
 assert_truthy(vim.fn.maparg("gx", "n") ~= "", "normal mode keymap is installed")
 assert_equal(vim.fn.maparg("gx", "v"), ":<C-U>OpenVisual<CR>", "visual mode keymap is installed")
+
+open.setup({ opener = "custom-open" })
+assert_equal(private.get_opener(), "custom-open", "setup applies custom opener")
+open.setup()
+assert_equal(private.get_opener(), private.detect_opener(), "setup resets opener to default")
 
 print("tests passed")

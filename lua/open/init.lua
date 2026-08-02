@@ -2,7 +2,7 @@ local M = {}
 
 --- Default configuration
 ---@type table
-local config = {
+local default_config = {
   --- Custom opener command (auto-detected if nil)
   ---@type string|string[]|nil
   opener = nil,
@@ -10,6 +10,8 @@ local config = {
   ---@type table|nil
   keymap = nil,
 }
+
+local config = vim.deepcopy(default_config)
 
 --- Detect the system opener command
 ---@return string|string[]
@@ -221,7 +223,7 @@ end
 ---@param opts? table
 function M.setup(opts)
   opts = opts or {}
-  config = vim.tbl_deep_extend("force", config, opts)
+  config = vim.tbl_deep_extend("force", vim.deepcopy(default_config), opts)
 
   -- Create user commands
   vim.api.nvim_create_user_command("OpenUnderCursor", M.open_under_cursor, {
@@ -256,6 +258,7 @@ M._private = {
   clean_word = clean_word,
   detect_opener = detect_opener,
   expand_home = expand_home,
+  get_opener = get_opener,
   get_word_under_cursor = get_word_under_cursor,
   get_visual_selection = get_visual_selection,
   opener_exists = opener_exists,
