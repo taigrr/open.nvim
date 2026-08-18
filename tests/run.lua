@@ -64,6 +64,9 @@ assert_equal(
   "build_open_command preserves generic list opener args"
 )
 
+local uv = vim.uv or vim.loop
+assert_truthy(uv, "Neovim exposes uv or loop")
+
 local detect_cases = {
   {
     name = "darwin",
@@ -87,14 +90,14 @@ local detect_cases = {
   },
 }
 
-local original_os_uname = vim.loop.os_uname
+local original_os_uname = uv.os_uname
 for _, case in ipairs(detect_cases) do
-  vim.loop.os_uname = function()
+  uv.os_uname = function()
     return case.uname
   end
   assert_equal(private.detect_opener(), case.expected, "detect_opener " .. case.name)
 end
-vim.loop.os_uname = original_os_uname
+uv.os_uname = original_os_uname
 
 assert_truthy(private.opener_exists("sh"), "opener_exists detects available binary")
 assert_equal(private.opener_exists("definitely-not-a-real-open-command"), false, "opener_exists rejects missing binary")

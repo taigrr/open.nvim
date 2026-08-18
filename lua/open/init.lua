@@ -1,4 +1,5 @@
 local M = {}
+local uv = vim.uv or vim.loop
 
 --- Default configuration
 ---@type table
@@ -16,7 +17,7 @@ local config = vim.deepcopy(default_config)
 --- Detect the system opener command
 ---@return string|string[]
 local function detect_opener()
-  local uname = vim.loop.os_uname()
+  local uname = uv.os_uname()
   local sysname = uname.sysname
 
   if sysname == "Darwin" then
@@ -70,7 +71,7 @@ local function opener_exists(opener)
   end
 
   if executable:match("[/\\]") then
-    return vim.loop.fs_stat(executable) ~= nil
+    return uv.fs_stat(executable) ~= nil
   end
 
   return vim.fn.executable(executable) == 1
