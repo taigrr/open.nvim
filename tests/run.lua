@@ -24,6 +24,8 @@ assert_equal(
 )
 assert_equal(private.clean_word("~/notes.txt..."), "~/notes.txt", "clean_word strips trailing punctuation")
 assert_equal(private.expand_home("~/notes.txt"), (os.getenv("HOME") or "") .. "/notes.txt", "expand_home expands tilde")
+assert_equal(private.expand_home("~"), os.getenv("HOME") or "", "expand_home expands bare tilde")
+assert_equal(private.expand_home("~other/notes.txt"), "~other/notes.txt", "expand_home leaves named homes unchanged")
 
 vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta", "gamma delta" })
 vim.api.nvim_win_set_cursor(0, { 1, 0 })
