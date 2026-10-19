@@ -85,9 +85,11 @@ Run the headless test suite:
 
 ```bash
 nvim --headless -u NONE -c "set rtp+=." -l tests/run.lua
+nvim --headless -u NONE -l tests/opener_paths.lua
 ```
 
-The tests cover opener detection, command building, command registration, and visual-mode keymap setup.
+The tests cover opener detection, executable path validation, command building, command registration, and visual-mode keymap setup.
+The executable path tests require a POSIX system.
 
 ## License
 
