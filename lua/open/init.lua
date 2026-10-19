@@ -158,7 +158,7 @@ end
 ---@param word string
 ---@return string
 local function expand_home(word)
-  if word:sub(1, 1) == "~" then
+  if word == "~" or word:sub(1, 2) == "~/" then
     local home = os.getenv("HOME") or ""
     word = home .. word:sub(2)
   end
