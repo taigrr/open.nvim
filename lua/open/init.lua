@@ -70,10 +70,6 @@ local function opener_exists(opener)
     return false
   end
 
-  if executable:match("[/\\]") then
-    return uv.fs_stat(executable) ~= nil
-  end
-
   return vim.fn.executable(executable) == 1
 end
 
