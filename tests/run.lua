@@ -45,6 +45,20 @@ vim.api.nvim_buf_set_mark(0, "<", 2, 4, {})
 vim.api.nvim_buf_set_mark(0, ">", 1, 6, {})
 assert_equal(private.get_visual_selection(), "beta gamma", "get_visual_selection normalizes reversed marks")
 
+-- Visual marks use byte offsets at the start of each selected character.
+for _, ending in ipairs({ "é", "界", "😀" }) do
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { "path/" .. ending, "next/" .. ending })
+  vim.api.nvim_buf_set_mark(0, "<", 1, 0, {})
+  vim.api.nvim_buf_set_mark(0, ">", 1, 5, {})
+  assert_equal(private.get_visual_selection(), "path/" .. ending, "visual selection preserves final " .. ending)
+  vim.api.nvim_buf_set_mark(0, ">", 2, 5, {})
+  assert_equal(
+    private.get_visual_selection(),
+    "path/" .. ending .. " next/" .. ending,
+    "multi-line visual selection preserves final " .. ending
+  )
+end
+
 assert_equal(
   private.build_open_command("xdg-open", "https://example.com"),
   { "xdg-open", "https://example.com" },
