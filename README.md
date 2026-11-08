@@ -84,7 +84,9 @@ The plugin grabs the whitespace-delimited word under cursor (or visual selection
 Run the headless test suite:
 
 ```bash
-nvim --headless -u NONE -c "set rtp+=." -l tests/run.lua
+nvim --headless -u NONE -l tests/run.lua
+nvim --headless -u NONE -l tests/opener_paths.lua
+nvim --headless -u NONE -l tests/open.lua
 nvim --headless -u NONE -l tests/opener_paths.lua
 ```
 
