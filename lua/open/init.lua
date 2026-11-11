@@ -126,7 +126,8 @@ local function get_visual_selection()
       return ""
     end
     lines[1] = lines[1]:sub(start_col + 1)
-    lines[#lines] = lines[#lines]:sub(1, end_col + 1)
+    local final_character = vim.fn.strcharpart(lines[#lines]:sub(end_col + 1), 0, 1)
+    lines[#lines] = lines[#lines]:sub(1, end_col + #final_character)
     return table.concat(lines, " ")
   end
 
@@ -134,7 +135,9 @@ local function get_visual_selection()
   if not line then
     return ""
   end
-  return line:sub(start_col + 1, end_col + 1)
+  -- Marks point to the first byte; include the entire final UTF-8 character.
+  local final_character = vim.fn.strcharpart(line:sub(end_col + 1), 0, 1)
+  return line:sub(start_col + 1, end_col + #final_character)
 end
 
 --- Clean up surrounding punctuation from a word
