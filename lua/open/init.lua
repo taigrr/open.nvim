@@ -141,11 +141,23 @@ end
 ---@param word string
 ---@return string
 local function clean_word(word)
-  -- Strip common surrounding characters like quotes, parens, brackets, commas
-  word = word:gsub("^[%[%]()<>\"',`]+", ""):gsub("[%[%]()<>\"',`]+$", "")
-
-  -- Strip trailing punctuation that's unlikely part of a URL/path
-  word = word:gsub("[%.;:]+$", "")
+  -- Strip leading wrappers, then trim trailing punctuation without removing
+  -- balanced parentheses that belong to a URL or filename.
+  word = word:gsub("^[%[%]()<>\"',`]+", "")
+  local _, opening = word:gsub("%(", "")
+  local _, closing = word:gsub("%)", "")
+  while #word > 0 do
+    local last = word:sub(-1)
+    if last == ")" then
+      if closing <= opening then
+        break
+      end
+      closing = closing - 1
+    elseif not last:match("[%[%](<>\"',`%.;:]") then
+      break
+    end
+    word = word:sub(1, -2)
+  end
 
   return word
 end

@@ -22,6 +22,20 @@ assert_equal(
   "https://example.com/path",
   "clean_word strips wrappers"
 )
+for _, target in ipairs({
+  "https://en.wikipedia.org/wiki/Function_(mathematics)",
+  "https://example.com/a(b(c))",
+  "~/notes (draft)",
+}) do
+  assert_equal(private.clean_word(target), target, "clean_word preserves balanced parentheses")
+  assert_equal(private.clean_word("(" .. target .. "),"), target, "clean_word removes only wrapper parentheses")
+end
+assert_equal(
+  private.clean_word("https://example.com/path)"),
+  "https://example.com/path",
+  "clean_word strips unmatched closing parenthesis"
+)
+
 assert_equal(private.clean_word("~/notes.txt..."), "~/notes.txt", "clean_word strips trailing punctuation")
 assert_equal(private.expand_home("~/notes.txt"), (os.getenv("HOME") or "") .. "/notes.txt", "expand_home expands tilde")
 assert_equal(private.expand_home("~"), os.getenv("HOME") or "", "expand_home expands bare tilde")
