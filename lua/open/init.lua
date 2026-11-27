@@ -24,7 +24,7 @@ local function detect_opener()
     return "open"
   elseif sysname == "Linux" then
     -- Check for WSL
-    if uname.release and uname.release:match("[Mm]icrosoft") then
+    if uname.release and uname.release:lower():match("microsoft") then
       return "wslview"
     end
     return "xdg-open"
