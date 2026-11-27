@@ -92,6 +92,17 @@ local detect_cases = {
   },
 }
 
+for _, release in ipairs({
+  "5.15.153.1-MICROSOFT-standard-WSL2",
+  "4.4.0-MiCrOsOfT",
+}) do
+  table.insert(detect_cases, {
+    name = "wsl release " .. release,
+    uname = { sysname = "Linux", release = release },
+    expected = "wslview",
+  })
+end
+
 local original_os_uname = uv.os_uname
 for _, case in ipairs(detect_cases) do
   uv.os_uname = function()
